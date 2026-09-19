@@ -18,8 +18,8 @@ export default defineConfig({
         description:
           "Reading practice for kids: read a text, answer questions, see speed and comprehension.",
         lang: "uk",
-        theme_color: "#0f766e",
-        background_color: "#f0fdfa",
+        theme_color: "#8b7cf0",
+        background_color: "#faf7fd",
         display: "standalone",
         orientation: "portrait",
         start_url: "/",
@@ -46,6 +46,28 @@ export default defineConfig({
             urlPattern: /\/assets\/parent-[^/]+\.js$/,
             handler: "StaleWhileRevalidate",
             options: { cacheName: "parent-screens" },
+          },
+          /**
+           * The two webfonts, kept for a year.
+           *
+           * They are loaded from Google rather than bundled, so without this a
+           * tablet in aeroplane mode falls back to system-ui and the whole app
+           * changes shape. Cache-first because a font file at a versioned URL
+           * never changes.
+           */
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\//,
+            handler: "StaleWhileRevalidate",
+            options: { cacheName: "font-styles" },
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.gstatic\.com\//,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "font-files",
+              expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
           },
         ],
         // Gemini is called directly from the page. The service worker must never

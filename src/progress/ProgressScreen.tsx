@@ -253,10 +253,14 @@ function Stat({
   highlight?: boolean;
 }) {
   return (
-    <Card className={highlight ? "border-primary" : undefined}>
-      <CardContent className="flex flex-col items-center gap-1 py-4 text-center">
+    <Card className={highlight ? "border-primary/40 bg-primary/8" : undefined}>
+      <CardContent className="flex flex-col items-center gap-1 py-5 text-center">
         <span className="text-xs text-muted-foreground">{label}</span>
-        <span className="font-display text-lg font-bold tabular-nums">{value}</span>
+        <span
+          className={`font-display text-lg font-bold tabular-nums ${highlight ? "text-primary" : ""}`}
+        >
+          {value}
+        </span>
       </CardContent>
     </Card>
   );

@@ -343,12 +343,12 @@ function QuizBody({ loaded, settings, update, navigate, t }: BodyProps) {
       {revealing && state.lastVerdict && (
         <div
           role="status"
-          className={`flex items-center justify-center gap-2 rounded-lg p-4 text-lg font-semibold ${
+          className={`flex items-center justify-center gap-3 rounded-3xl p-5 text-xl font-bold ${
             state.lastVerdict === "correct"
-              ? "bg-correct/15 text-correct"
+              ? "bg-correct/12 text-correct"
               : state.lastVerdict === "unsure"
                 ? "bg-muted text-muted-foreground"
-                : "bg-wrong/15 text-wrong"
+                : "bg-wrong/12 text-wrong"
           }`}
         >
           {/* Icon and text together, never colour alone. */}

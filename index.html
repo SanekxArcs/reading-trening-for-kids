@@ -6,10 +6,27 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no"
     />
-    <meta name="theme-color" content="#0f766e" />
+    <meta name="theme-color" content="#8b7cf0" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!--
+      The two faces the design tokens have always named and the app has never
+      loaded: until now every screen fell back to system-ui, which is why it
+      looked like a form rather than like something made for a child.
+
+      Cyrillic and latin-ext are both requested: the interface is Ukrainian and
+      the texts are Polish as often as not. `display=swap` keeps the reading
+      screen readable while they arrive, and the service worker keeps them
+      afterwards, so the second launch needs no network.
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700&family=Nunito:ital,wght@0,400;0,600;0,700;1,400&display=swap&subset=latin,latin-ext,cyrillic,cyrillic-ext"
+    />
     <title>Читайко</title>
   </head>
   <body>

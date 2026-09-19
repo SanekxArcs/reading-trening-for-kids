@@ -267,12 +267,23 @@ export function ResultScreen() {
   );
 }
 
+/**
+ * One of the three numbers across the top.
+ *
+ * The highlighted one is effective speed, and it is the only one tinted: it is
+ * the number the whole app is built around, and three equally loud tiles say
+ * nothing about which to look at.
+ */
 function Stat({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
-    <Card className={highlight ? "border-primary" : undefined}>
-      <CardContent className="flex flex-col items-center gap-1 py-4 text-center">
+    <Card className={highlight ? "border-primary/40 bg-primary/8" : undefined}>
+      <CardContent className="flex flex-col items-center gap-1 py-5 text-center">
         <span className="text-xs text-muted-foreground">{label}</span>
-        <span className="font-display text-xl font-bold tabular-nums">{value}</span>
+        <span
+          className={`font-display text-2xl font-bold tabular-nums ${highlight ? "text-primary" : ""}`}
+        >
+          {value}
+        </span>
       </CardContent>
     </Card>
   );

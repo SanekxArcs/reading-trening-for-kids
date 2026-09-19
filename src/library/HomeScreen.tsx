@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { BookOpen, ClipboardCheck, Plus, Settings as SettingsIcon, TrendingUp } from "lucide-react";
+import {
+  BookOpen,
+  ChevronRight,
+  ClipboardCheck,
+  Plus,
+  Settings as SettingsIcon,
+  TrendingUp,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useI18n } from "@/i18n/useI18n";
@@ -57,7 +64,7 @@ export function HomeScreen() {
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-2xl flex-col gap-6 p-4">
       <header className="flex items-center justify-between">
-        <h1 className="font-display text-3xl font-bold text-primary">{t("appName")}</h1>
+        <h1 className="font-display text-4xl font-bold text-primary">{t("appName")}</h1>
         <div className="flex gap-1">
           <Button asChild variant="ghost" size="icon" aria-label={t("progress")}>
             <Link to="/progress">
@@ -72,7 +79,7 @@ export function HomeScreen() {
         </div>
       </header>
 
-      <Button asChild size="lg" className="h-14 text-lg">
+      <Button asChild size="lg" className="h-16 text-xl">
         <Link to="/add">
           <Plus />
           {t("addText")}
@@ -81,9 +88,11 @@ export function HomeScreen() {
 
       {texts === null ? null : texts.length === 0 ? (
         <Card>
-          <CardContent className="flex flex-col items-center gap-4 py-10 text-center">
-            <BookOpen className="size-10 text-muted-foreground" aria-hidden />
-            <p className="text-muted-foreground">{t("noTextsYet")}</p>
+          <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
+            <span className="flex size-20 items-center justify-center rounded-full bg-secondary">
+              <BookOpen className="size-9 text-secondary-foreground" aria-hidden />
+            </span>
+            <p className="text-lg text-muted-foreground">{t("noTextsYet")}</p>
           </CardContent>
         </Card>
       ) : (
@@ -92,14 +101,31 @@ export function HomeScreen() {
             const reads = readCount(text.id);
             return (
               <li key={text.id}>
-                <Card className="transition-colors hover:border-primary">
+                <Card className="transition-all hover:border-primary hover:shadow-md">
                   <CardContent className="flex flex-col gap-2 py-4">
-                    <Link to={`/read/${text.id}`} className="flex flex-col gap-1">
-                      <span className="font-display text-lg font-semibold">{text.title}</span>
-                      <span className="text-sm text-muted-foreground">
-                        {t("wordsCount", { count: text.wordCount })} ·{" "}
-                        {reads === 0 ? t("neverRead") : t("readTimes", { count: reads })}
+                    {/* The whole row is the target, not the title: a finger
+                        aiming at three words misses, and this is the one thing
+                        a child does on this screen. */}
+                    <Link to={`/read/${text.id}`} className="flex items-center gap-3">
+                      {/* A soft bubble per text, hue chosen from the title so
+                          the same book looks the same every evening. */}
+                      <span
+                        className="flex size-12 shrink-0 items-center justify-center rounded-2xl"
+                        style={{ backgroundColor: `var(--qtype-${text.title.length % 6})` }}
+                        aria-hidden
+                      >
+                        <BookOpen className="size-6 text-foreground/70" />
                       </span>
+                      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                        <span className="truncate font-display text-lg font-semibold">
+                          {text.title}
+                        </span>
+                        <span className="text-sm text-muted-foreground">
+                          {t("wordsCount", { count: text.wordCount })} ·{" "}
+                          {reads === 0 ? t("neverRead") : t("readTimes", { count: reads })}
+                        </span>
+                      </span>
+                      <ChevronRight className="size-5 shrink-0 text-muted-foreground" aria-hidden />
                     </Link>
                     {wantsReview(text.id) && (
                       <Link

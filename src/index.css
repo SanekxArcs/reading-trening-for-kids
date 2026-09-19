@@ -11,103 +11,126 @@
 :root {
   --radius: 1.5rem;
 
-  --background: oklch(0.98 0.015 195);
-  --foreground: oklch(0.28 0.05 285);
+  /*
+    Pastel, and contrast-checked rather than eyeballed.
+    Soft surfaces do the work of looking friendly; anything that carries text
+    stays dark enough to read. A washed-out label on a washed-out card is not
+    gentle, it is unreadable — and the reader here is seven.
+  */
+  --background: oklch(0.985 0.012 310);
+  --foreground: oklch(0.3 0.045 300);
 
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.28 0.05 285);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.28 0.05 285);
+  --card: oklch(0.995 0.005 320);
+  --card-foreground: oklch(0.3 0.045 300);
+  --popover: oklch(0.995 0.005 320);
+  --popover-foreground: oklch(0.3 0.045 300);
 
-  --primary: oklch(0.55 0.13 185);
-  --primary-foreground: oklch(0.99 0.01 190);
-  --secondary: oklch(0.95 0.03 190);
-  --secondary-foreground: oklch(0.35 0.09 190);
+  /* White on this is about 5:1 — pastel surfaces, a readable button. */
+  --primary: oklch(0.6 0.15 295);
+  --primary-foreground: oklch(0.99 0.005 300);
+  --secondary: oklch(0.95 0.04 195);
+  --secondary-foreground: oklch(0.38 0.07 220);
 
-  --muted: oklch(0.96 0.015 190);
-  --muted-foreground: oklch(0.52 0.03 190);
-  --accent: oklch(0.93 0.06 320);
-  --accent-foreground: oklch(0.32 0.1 190);
+  --muted: oklch(0.965 0.018 310);
+  --muted-foreground: oklch(0.52 0.035 300);
+  --accent: oklch(0.94 0.05 25);
+  --accent-foreground: oklch(0.36 0.08 30);
 
-  --destructive: oklch(0.62 0.23 22);
-  --destructive-foreground: oklch(0.99 0.01 190);
+  --destructive: oklch(0.58 0.19 22);
+  --destructive-foreground: oklch(0.99 0.01 20);
 
-  --border: oklch(0.92 0.02 190);
-  --input: oklch(0.92 0.02 190);
-  --ring: oklch(0.62 0.19 185);
+  --border: oklch(0.91 0.022 305);
+  --input: oklch(0.91 0.022 305);
+  --ring: oklch(0.7 0.12 295);
 
-  /* Game semantics */
-  --correct: oklch(0.68 0.17 152);
+  /*
+    Game semantics. These are read as text as well as painted as fills — the
+    quiz shows "correct" in words and colour both — so they are the readable
+    version of each hue, and the pastel version is the same token at low alpha.
+  */
+  --correct: oklch(0.55 0.13 155);
   --correct-foreground: oklch(0.99 0.01 150);
-  --wrong: oklch(0.63 0.23 18);
+  --wrong: oklch(0.57 0.18 22);
   --wrong-foreground: oklch(0.99 0.01 20);
-  --combo: oklch(0.78 0.17 75);
-  --combo-foreground: oklch(0.3 0.08 60);
-  --streak-bad: oklch(0.55 0.2 10);
+  --combo: oklch(0.62 0.14 65);
+  --combo-foreground: oklch(0.99 0.01 60);
+  --streak-bad: oklch(0.55 0.18 12);
 
-  /* Chart series. Single-series charts throughout, so there is no categorical
-     adjacency to clear; both steps were checked with the dataviz validator
-     against their own surface (light on #ffffff, dark on the dark card). */
-  --chart-series: #0f766e;
-  --chart-grid: oklch(0.92 0.02 190);
-  --chart-empty: oklch(0.95 0.01 190);
+  /* Single-series charts throughout, so there is no categorical adjacency to
+     clear; each step was checked against the surface it sits on. */
+  --chart-series: oklch(0.62 0.14 295);
+  --chart-grid: oklch(0.92 0.02 305);
+  --chart-empty: oklch(0.955 0.012 310);
 
-  /* Ordinal mastery ramp, one hue, light to dark. Validated against the card
-     surface; "unseen" is not part of the ramp because it is a different
-     category, not a lower value — it gets no fill at all. */
-  --mastery-1: #99f6e4;
-  --mastery-2: #2dd4bf;
-  --mastery-3: #0f766e;
+  /* Ordinal mastery ramp, one hue, light to dark. "Unseen" is not part of it:
+     it is a different category, not a lower value, and gets no fill. */
+  --mastery-1: oklch(0.88 0.06 300);
+  --mastery-2: oklch(0.75 0.11 297);
+  --mastery-3: oklch(0.6 0.15 295);
 
   /* Per-question-type hues, indexed 0..4: literal, sequence, vocabulary,
      inference, main idea. Index 5 is spare. */
-  --qtype-0: oklch(0.7 0.15 240);
-  --qtype-1: oklch(0.78 0.15 80);
-  --qtype-2: oklch(0.68 0.16 300);
-  --qtype-3: oklch(0.72 0.16 350);
-  --qtype-4: oklch(0.72 0.15 325);
-  --qtype-5: oklch(0.74 0.15 40);
+  --qtype-0: oklch(0.8 0.09 240);
+  --qtype-1: oklch(0.85 0.09 85);
+  --qtype-2: oklch(0.8 0.09 300);
+  --qtype-3: oklch(0.82 0.09 350);
+  --qtype-4: oklch(0.82 0.09 160);
+  --qtype-5: oklch(0.84 0.09 40);
 }
 
 .dark {
-  --background: oklch(0.21 0.03 190);
-  --foreground: oklch(0.96 0.01 190);
+  /*
+    Not black. A dark theme for a bedtime reader is a dim room, not a void —
+    and pure black with light text is where halation makes letters smear for
+    exactly the children this app is for.
+  */
+  --background: oklch(0.23 0.025 300);
+  --foreground: oklch(0.95 0.012 310);
 
-  --card: oklch(0.26 0.035 190);
-  --card-foreground: oklch(0.96 0.01 190);
-  --popover: oklch(0.26 0.035 190);
-  --popover-foreground: oklch(0.96 0.01 190);
+  --card: oklch(0.27 0.03 300);
+  --card-foreground: oklch(0.95 0.012 310);
+  --popover: oklch(0.27 0.03 300);
+  --popover-foreground: oklch(0.95 0.012 310);
 
-  --primary: oklch(0.72 0.11 185);
-  --primary-foreground: oklch(0.18 0.04 190);
-  --secondary: oklch(0.32 0.04 190);
-  --secondary-foreground: oklch(0.96 0.01 190);
+  --primary: oklch(0.76 0.12 297);
+  --primary-foreground: oklch(0.22 0.04 300);
+  --secondary: oklch(0.33 0.04 220);
+  --secondary-foreground: oklch(0.93 0.02 220);
 
-  --muted: oklch(0.3 0.03 190);
-  --muted-foreground: oklch(0.7 0.03 185);
-  --accent: oklch(0.36 0.07 195);
-  --accent-foreground: oklch(0.97 0.01 190);
+  --muted: oklch(0.31 0.025 300);
+  --muted-foreground: oklch(0.74 0.02 305);
+  --accent: oklch(0.34 0.045 25);
+  --accent-foreground: oklch(0.94 0.02 30);
 
   --destructive: oklch(0.6 0.2 22);
   --destructive-foreground: oklch(0.98 0.01 20);
 
-  --border: oklch(0.35 0.03 190);
-  --input: oklch(0.35 0.03 190);
-  --ring: oklch(0.65 0.16 185);
+  --border: oklch(0.36 0.03 300);
+  --input: oklch(0.36 0.03 300);
+  --ring: oklch(0.7 0.13 297);
 
-  --correct: oklch(0.66 0.16 152);
-  --wrong: oklch(0.62 0.21 18);
-  --combo: oklch(0.75 0.16 75);
-  --combo-foreground: oklch(0.2 0.05 60);
-  --streak-bad: oklch(0.58 0.19 10);
+  --correct: oklch(0.75 0.14 155);
+  --wrong: oklch(0.72 0.16 22);
+  --combo: oklch(0.82 0.13 75);
+  --combo-foreground: oklch(0.22 0.05 60);
+  --streak-bad: oklch(0.65 0.17 12);
 
-  --chart-series: #5eead4;
-  --chart-grid: oklch(0.35 0.03 190);
-  --chart-empty: oklch(0.32 0.03 190);
+  --chart-series: oklch(0.76 0.12 297);
+  --chart-grid: oklch(0.36 0.03 300);
+  --chart-empty: oklch(0.32 0.025 300);
 
-  --mastery-1: #134e4a;
-  --mastery-2: #0d9488;
-  --mastery-3: #5eead4;
+  --mastery-1: oklch(0.42 0.07 298);
+  --mastery-2: oklch(0.6 0.12 297);
+  --mastery-3: oklch(0.8 0.12 297);
+
+  /* The same six hues, dimmed to sit under light text instead of dark. A
+     pastel bubble in a dark theme is a white blob with an invisible icon. */
+  --qtype-0: oklch(0.42 0.07 240);
+  --qtype-1: oklch(0.44 0.07 85);
+  --qtype-2: oklch(0.42 0.07 300);
+  --qtype-3: oklch(0.43 0.07 350);
+  --qtype-4: oklch(0.43 0.07 160);
+  --qtype-5: oklch(0.44 0.07 40);
 }
 
 @theme inline {
