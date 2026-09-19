@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Check, Eye, EyeOff, HelpCircle, Mic, X } from "lucide-react";
+import { Check, Eye, EyeOff, HelpCircle, Keyboard, Mic, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import { useQuiz, type RecordedAnswer } from "./useQuiz.ts";
 import { getStoredQuestions } from "./questionSource.ts";
 import { resolveAnswers } from "./resolveAnswers.ts";
 import { useSpeech } from "@/voice/useSpeech";
+import { ModeChoice } from "@/components/ModeChoice";
 import {
   finishSession,
   getSession,
@@ -52,7 +53,7 @@ export function QuizScreen() {
   const { t } = useI18n();
   const navigate = useNavigate();
   const { sessionId } = useParams<{ sessionId: string }>();
-  const { settings } = useSettings();
+  const { settings, update } = useSettings();
   const [loaded, setLoaded] = useState<Loaded | null>(null);
 
   useEffect(() => {
@@ -68,17 +69,18 @@ export function QuizScreen() {
   }, [sessionId]);
 
   if (!loaded) return null;
-  return <QuizBody loaded={loaded} settings={settings} navigate={navigate} t={t} />;
+  return <QuizBody loaded={loaded} settings={settings} update={update} navigate={navigate} t={t} />;
 }
 
 interface BodyProps {
   loaded: Loaded;
   settings: ReadingSettings;
+  update: (patch: Partial<ReadingSettings>) => void;
   navigate: ReturnType<typeof useNavigate>;
   t: ReturnType<typeof useI18n>["t"];
 }
 
-function QuizBody({ loaded, settings, navigate, t }: BodyProps) {
+function QuizBody({ loaded, settings, update, navigate, t }: BodyProps) {
   const { session, text, questions } = loaded;
 
   const level = settings.level;
@@ -282,6 +284,26 @@ function QuizBody({ loaded, settings, navigate, t }: BodyProps) {
               )}
             </div>
           </form>
+
+          {/* Switched here, mid-round, by whoever is answering. It writes
+              through to the same setting the parent screen shows, so a child
+              who prefers speaking does not have to re-choose every evening. */}
+          <ModeChoice
+            label={t("answerMode")}
+            value={voice && speech.supported ? "voice" : "type"}
+            onChange={(answerMode) => update({ answerMode })}
+            options={[
+              { id: "type", label: t("answerModeType"), icon: <Keyboard /> },
+              {
+                id: "voice",
+                label: t("answerModeVoice"),
+                icon: <Mic />,
+                // The browser recogniser, not the model: no key needed, and
+                // nothing to offer where the browser has no recogniser.
+                available: speech.supported,
+              },
+            ]}
+          />
 
           {hintShown && (
             <p

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Mic, Minus, Pause, Play, Plus } from "lucide-react";
+import { ArrowLeft, BookOpen, Mic, Minus, Pause, Play, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useI18n } from "@/i18n/useI18n";
@@ -15,7 +15,8 @@ import {
   startSession,
 } from "@/data/repositories";
 import { useRecorder } from "@/voice/useRecorder";
-import { aiContext, requestReadAloud } from "@/ai/service";
+import { aiContext, isAiConfigured, requestReadAloud } from "@/ai/service";
+import { ModeChoice } from "@/components/ModeChoice";
 import { splitSentences } from "@/engine";
 import { countChars, speedFlag, warmupWords, type StoredText } from "@/engine";
 
@@ -34,10 +35,15 @@ export function ReadScreen() {
   const { settings, update } = useSettings();
   const timer = useReadingTimer();
   const recorder = useRecorder();
-  // Reading aloud needs both a microphone and a model to transcribe with; with
-  // either missing it silently becomes ordinary silent reading rather than a
-  // broken screen.
-  const aloud = settings.readingMode === "aloud" && recorder.phase !== "unsupported";
+  /**
+   * Reading aloud needs both a microphone and a model to transcribe with.
+   *
+   * With either missing this silently becomes ordinary silent reading rather
+   * than a broken screen — and the choice below is not offered at all, so a
+   * child is never handed a button that cannot work.
+   */
+  const canReadAloud = recorder.phase !== "unsupported" && isAiConfigured();
+  const aloud = settings.readingMode === "aloud" && canReadAloud;
 
   const [text, setText] = useState<StoredText | null>(null);
   const [starting, setStarting] = useState(false);
@@ -182,6 +188,24 @@ export function ReadScreen() {
               {t("wordsCount", { count: text.wordCount })} ·{" "}
               {t("sentencesCount", { count: text.sentenceCount })}
             </p>
+            {/* Changed here, where the child is about to read, rather than
+                behind the parent PIN. It still writes through to the same
+                setting, so tonight's choice is tomorrow's default. */}
+            <ModeChoice
+              label={t("readingMode")}
+              value={aloud ? "aloud" : "silent"}
+              onChange={(readingMode) => update({ readingMode })}
+              options={[
+                { id: "silent", label: t("readingModeSilent"), icon: <BookOpen /> },
+                {
+                  id: "aloud",
+                  label: t("readingModeAloud"),
+                  icon: <Mic />,
+                  available: canReadAloud,
+                },
+              ]}
+            />
+
             {aloud && <p className="text-muted-foreground">{t("readAloudHint")}</p>}
 
             {warmup.length > 0 && (
