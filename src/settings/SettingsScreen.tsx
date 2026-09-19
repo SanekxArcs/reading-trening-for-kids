@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useI18n } from "@/i18n/useI18n";
+import { AppShell } from "@/components/AppShell";
 import { LANG_LABELS, LANGS } from "@/i18n/translations";
 import { useTheme, type Theme } from "@/lib/useTheme";
 import { isSpeechSupported } from "@/voice/useSpeech";
@@ -39,7 +40,7 @@ function SettingsBody() {
   const { settings, update } = useSettings();
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-2xl flex-col gap-4 p-4">
+    <AppShell>
       <header className="flex items-center gap-2">
         <Button asChild variant="ghost" size="icon" aria-label={t("back")}>
           <Link to="/">
@@ -180,7 +181,7 @@ function SettingsBody() {
           ))}
         </CardContent>
       </Card>
-    </div>
+    </AppShell>
   );
 }
 

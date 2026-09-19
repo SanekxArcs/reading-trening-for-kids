@@ -189,7 +189,10 @@ function QuizBody({ loaded, settings, update, navigate, t }: BodyProps) {
 
   if (state.phase === "finished" || !question) {
     return (
-      <div className="mx-auto flex min-h-dvh w-full max-w-2xl items-center justify-center p-4">
+      <div
+        className="mx-auto flex min-h-dvh w-full max-w-2xl items-center justify-center p-4"
+        role="status"
+      >
         <p className="font-display text-xl text-muted-foreground">{t("checkingAnswers")}</p>
       </div>
     );

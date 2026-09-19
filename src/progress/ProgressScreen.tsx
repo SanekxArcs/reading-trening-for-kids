@@ -4,6 +4,7 @@ import { ArrowLeft, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useI18n } from "@/i18n/useI18n";
+import { AppShell } from "@/components/AppShell";
 import type { TranslationKey } from "@/i18n/translations";
 import { listAllSessions, listAnswers, listTexts, loadStats } from "@/data/repositories";
 import { displayPercent, displayRate, type MasteryBand, type QuestionType } from "@/engine";
@@ -97,7 +98,7 @@ export function ProgressScreen() {
   }, [settings.level]);
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-2xl flex-col gap-4 p-4">
+    <AppShell>
       <header className="flex items-center gap-2">
         <Button asChild variant="ghost" size="icon" aria-label={t("back")}>
           <Link to="/">
@@ -200,7 +201,7 @@ export function ProgressScreen() {
           </ul>
         </>
       )}
-    </div>
+    </AppShell>
   );
 }
 

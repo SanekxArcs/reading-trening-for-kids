@@ -32,6 +32,8 @@ const en = {
   delete: "Delete",
   retry: "Try again",
   close: "Close",
+  skipToContent: "Skip to the page",
+  navMain: "Main navigation",
 
   // Library
   addText: "Add a text",
@@ -239,6 +241,8 @@ const uk: Record<TranslationKey, string> = {
   delete: "Видалити",
   retry: "Спробувати ще",
   close: "Закрити",
+  skipToContent: "Перейти до вмісту",
+  navMain: "Головна навігація",
 
   addText: "Додати текст",
   pasteText: "Вставити текст",
@@ -435,6 +439,8 @@ const pl: Record<TranslationKey, string> = {
   delete: "Usuń",
   retry: "Spróbuj ponownie",
   close: "Zamknij",
+  skipToContent: "Przejdź do treści",
+  navMain: "Nawigacja główna",
 
   addText: "Dodaj tekst",
   pasteText: "Wklej tekst",
