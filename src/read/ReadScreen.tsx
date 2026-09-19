@@ -17,6 +17,7 @@ import {
 import { useRecorder } from "@/voice/useRecorder";
 import { aiContext, isAiConfigured, requestReadAloud } from "@/ai/service";
 import { ModeChoice } from "@/components/ModeChoice";
+import { QuickToggles } from "@/components/QuickToggles";
 import { splitSentences } from "@/engine";
 import { countChars, speedFlag, warmupWords, type StoredText } from "@/engine";
 
@@ -178,7 +179,8 @@ export function ReadScreen() {
               <ArrowLeft />
             </Link>
           </Button>
-          <h1 className="font-display text-xl font-bold">{text.title}</h1>
+          <h1 className="min-w-0 flex-1 truncate font-display text-xl font-bold">{text.title}</h1>
+          <QuickToggles settings={settings} update={update} />
         </header>
 
         <Card>
@@ -256,6 +258,7 @@ export function ReadScreen() {
         </span>
 
         <div className="flex items-center gap-1">
+          <QuickToggles settings={settings} update={update} />
           {aloud && recorder.phase === "recording" && (
             <Mic className="size-4 animate-pulse text-wrong" aria-label={t("listening")} />
           )}

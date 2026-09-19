@@ -1,3 +1,4 @@
+import { modelGeneration } from "../core/modelLimits.ts";
 import type { ModelInfo } from "../core/provider.ts";
 import type { GeminiModel } from "./wire.ts";
 
@@ -29,13 +30,10 @@ function rank(id: string): number {
 
 /**
  * Newer families first within the same rank, so `gemini-3-flash` outranks
- * `gemini-2.5-flash` without either being named.
+ * `gemini-2.5-flash` without either being named. Shared with the rate-limit
+ * table, which bands models by the same number.
  */
-function version(id: string): number {
-  const match = /gemini-(\d+)(?:\.(\d+))?/i.exec(id);
-  if (!match) return 0;
-  return Number(match[1]) * 100 + Number(match[2] ?? 0);
-}
+const version = modelGeneration;
 
 export function selectUsableModels(raw: readonly GeminiModel[]): ModelInfo[] {
   return raw
@@ -50,7 +48,9 @@ export function selectUsableModels(raw: readonly GeminiModel[]): ModelInfo[] {
         outputTokenLimit: model.outputTokenLimit ?? 8_192,
         // The field when the API provides it; otherwise assume the families
         // that have had thinking since 2.5 do, and let the probe correct us.
-        supportsThinking: model.thinking ?? version(id) >= 250,
+        // 2.5 is 205 on this scale, not 250 — the old threshold here quietly
+        // excluded the whole 2.5 family from thinking.
+        supportsThinking: model.thinking ?? version(id) >= 205,
       };
     })
     .toSorted((a, b) => {

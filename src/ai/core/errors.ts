@@ -190,9 +190,16 @@ export function errorInfo(code: AiErrorCode): AiErrorInfo {
   return INFO[code];
 }
 
+/** What a quota failure said this key is allowed. Both halves are optional. */
+export interface QuotaAllowance {
+  rpm?: number;
+  rpd?: number;
+}
+
 export interface AiErrorOptions {
   status?: number | undefined;
   retryAfterMs?: number | undefined;
+  quota?: QuotaAllowance | undefined;
 }
 
 export class AiError extends Error {
@@ -201,6 +208,14 @@ export class AiError extends Error {
   readonly retryAfterMs: number | null;
   /** Raw provider text. Parent diagnostics only; never rendered by default. */
   readonly detail: string;
+  /**
+   * The allowance the provider stated while refusing.
+   *
+   * A 429 is the one moment the API says what the limit actually is, and it is
+   * the only authoritative source left — so it is recorded rather than thrown
+   * away with the rest of the failure.
+   */
+  readonly quota: QuotaAllowance | null;
 
   constructor(code: AiErrorCode, detail: string, options: AiErrorOptions = {}) {
     super(`${code}: ${detail}`);
@@ -209,6 +224,7 @@ export class AiError extends Error {
     this.detail = detail;
     this.httpStatus = options.status ?? null;
     this.retryAfterMs = options.retryAfterMs ?? null;
+    this.quota = options.quota ?? null;
   }
 
   get info(): AiErrorInfo {

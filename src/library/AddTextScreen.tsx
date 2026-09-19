@@ -12,6 +12,7 @@ import { useSettings } from "@/settings/useSettings";
 import { ScanCard } from "./ScanCard.tsx";
 import { StoryCard } from "./StoryCard.tsx";
 import { defaultTextLang, TEXT_LANG_NAMES } from "./textLanguage.ts";
+import { CHILD_LEVELS, LEVEL_KEYS } from "@/settings/levelLabels";
 import {
   countWords,
   guessLanguage,
@@ -33,7 +34,7 @@ import {
 export function AddTextScreen() {
   const { t, lang: uiLang } = useI18n();
   const navigate = useNavigate();
-  const { settings } = useSettings();
+  const { settings, update } = useSettings();
 
   const [body, setBody] = useState("");
   const [title, setTitle] = useState("");
@@ -113,6 +114,27 @@ export function AddTextScreen() {
               onChange={(event) => setTitle(event.target.value)}
               placeholder={stats ? undefined : ""}
             />
+          </div>
+
+          {/* Chosen here, with the text in front of them, because this is what
+              the questions get written for: the same page is a fair challenge
+              for one child and a wall for another, and a parent judging that
+              is judging *this* text, not filling in a profile. */}
+          <div className="flex flex-col gap-2 rounded-lg bg-muted p-3">
+            <Label>{t("childLevel")}</Label>
+            <div className="flex flex-wrap gap-2">
+              {CHILD_LEVELS.map((level) => (
+                <Button
+                  key={level}
+                  size="sm"
+                  variant={level === settings.level ? "default" : "outline"}
+                  aria-pressed={level === settings.level}
+                  onClick={() => update({ level })}
+                >
+                  {t(LEVEL_KEYS[level])}
+                </Button>
+              ))}
+            </div>
           </div>
 
           {/* Always visible, never only once there is text: a scan and a

@@ -10,4 +10,16 @@ import type { TranslationKey } from "@/i18n/translations";
  */
 export type TranslationKeyOfLevel = Extract<TranslationKey, `level${string}`>;
 
+/**
+ * Shared by both places a level is chosen: the settings screen, and the moment
+ * a text is added — which is where the choice actually belongs, because the
+ * level decides what questions get written about *this* text.
+ */
+export const LEVEL_KEYS: Record<ChildLevel, TranslationKeyOfLevel> = {
+  beginner: "levelBeginner",
+  developing: "levelDeveloping",
+  fluent: "levelFluent",
+  advanced: "levelAdvanced",
+};
+
 export { CHILD_LEVELS, type ChildLevel };

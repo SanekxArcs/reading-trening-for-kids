@@ -12,17 +12,10 @@ import { useSettings } from "./useSettings.ts";
 import { ApiKeyCard } from "./ApiKeyCard.tsx";
 import { UsageCard } from "./UsageCard.tsx";
 import { PinGate } from "./PinGate.tsx";
-import { CHILD_LEVELS, type ChildLevel, type TranslationKeyOfLevel } from "./levelLabels.ts";
+import { CHILD_LEVELS, LEVEL_KEYS } from "./levelLabels.ts";
 
 const THEMES: readonly Theme[] = ["light", "dark", "system"];
 const THEME_ICONS: Record<Theme, string> = { light: "☀️", dark: "🌙", system: "💻" };
-
-const LEVEL_KEYS: Record<ChildLevel, TranslationKeyOfLevel> = {
-  beginner: "levelBeginner",
-  developing: "levelDeveloping",
-  fluent: "levelFluent",
-  advanced: "levelAdvanced",
-};
 
 /**
  * Settings, behind the parent PIN.

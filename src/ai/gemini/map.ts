@@ -157,6 +157,28 @@ export function isDailyQuota(body: GeminiErrorBody | null): boolean {
   );
 }
 
+/**
+ * The allowance a quota failure states, which is the only place it is stated.
+ *
+ * Google stopped publishing per-model limits; `QuotaFailure.quotaValue` is
+ * authoritative, current and specific to this key's tier. Reading it turns the
+ * first 429 of a model's life into a permanent fact about it.
+ */
+export function quotaLimits(body: GeminiErrorBody | null): { rpm?: number; rpd?: number } {
+  const out: { rpm?: number; rpd?: number } = {};
+
+  for (const detail of body?.error.details ?? []) {
+    for (const violation of detail.violations ?? []) {
+      const value = Number.parseInt(violation.quotaValue ?? "", 10);
+      if (!Number.isFinite(value) || value <= 0) continue;
+      const id = violation.quotaId ?? "";
+      if (/per.?day/i.test(id)) out.rpd = value;
+      else if (/per.?minute/i.test(id)) out.rpm = value;
+    }
+  }
+  return out;
+}
+
 /** True when a 400 is telling us the model dislikes `thinkingConfig`. */
 export function isThinkingComplaint(body: GeminiErrorBody | null): boolean {
   return /thinking|thinking_?budget|thinkingConfig/i.test(body?.error.message ?? "");
@@ -182,8 +204,10 @@ export function classifyHttp(status: number, body: GeminiErrorBody | null): AiEr
 export function toAiError(status: number, body: GeminiErrorBody | null, headers: Headers | null) {
   const code = classifyHttp(status, body);
   const retryAfterMs = parseRetryDelayMs(headers, body);
+  const quota = quotaLimits(body);
   return new AiError(code, body?.error.message ?? `HTTP ${status}`, {
     status,
     ...(retryAfterMs === null ? {} : { retryAfterMs }),
+    ...(quota.rpm === undefined && quota.rpd === undefined ? {} : { quota }),
   });
 }

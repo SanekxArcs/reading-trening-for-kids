@@ -75,7 +75,12 @@ export interface GeminiErrorDetail {
   "@type": string;
   /** e.g. "21s" */
   retryDelay?: string;
-  violations?: { quotaId?: string; quotaMetric?: string }[];
+  /**
+   * `quotaValue` is the allowance itself, as a string. It is the only place
+   * the real per-model limit is ever stated, now that the documentation prints
+   * none — so it is worth keeping rather than only counting the failure.
+   */
+  violations?: { quotaId?: string; quotaMetric?: string; quotaValue?: string }[];
 }
 
 export interface GeminiErrorBody {

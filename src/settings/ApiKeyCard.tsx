@@ -8,6 +8,8 @@ import { useI18n } from "@/i18n/useI18n";
 import { GeminiProvider } from "@/ai/gemini/provider";
 import { defaultModel, resolveModel } from "@/ai/gemini/models";
 import { errorInfo } from "@/ai/core/errors";
+import { estimatedLimits, isRecommended, limitsFor } from "@/ai/core/modelLimits";
+import { readObservedLimit } from "@/ai/runtime/quota";
 import type { ModelInfo } from "@/ai/core/provider";
 import {
   clearApiKey,
@@ -126,26 +128,7 @@ export function ApiKeyCard() {
           </p>
         )}
 
-        {models.length > 0 && (
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="model">{t("model")}</Label>
-            <select
-              id="model"
-              className="h-10 rounded-lg border border-input bg-background px-3"
-              value={modelId ?? defaultModel(models)?.id ?? ""}
-              onChange={(event) => {
-                writeModelId(event.target.value);
-                setModelId(event.target.value);
-              }}
-            >
-              {models.map((model) => (
-                <option key={model.id} value={model.id}>
-                  {model.displayName}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
+        {models.length > 0 && <ModelPicker models={models} value={modelId} onChange={setModelId} />}
 
         {/* Said plainly rather than buried: anything that can run script on this
             origin can read the key. The real mitigations are a separate key,
@@ -153,5 +136,79 @@ export function ApiKeyCard() {
         <p className="text-xs text-muted-foreground">{t("apiKeyHelp")}</p>
       </CardContent>
     </Card>
+  );
+}
+
+/**
+ * Which model, and what it costs a family to choose it.
+ *
+ * The list a key returns is a dozen models of which two are worth picking, so
+ * the Gemini 3 Flash families come first and everything else is behind a
+ * toggle — a list nobody reads is a default nobody changes.
+ *
+ * Each one carries its daily allowance, because that is the decision. A model
+ * with twenty requests a day is not a slower version of one with five hundred;
+ * it is one that stops working on a Tuesday, and there is no way to find that
+ * out from its name.
+ */
+function ModelPicker({
+  models,
+  value,
+  onChange,
+}: {
+  models: readonly ModelInfo[];
+  value: string | null;
+  onChange: (id: string) => void;
+}) {
+  const { t } = useI18n();
+  const [showAll, setShowAll] = useState(false);
+
+  const recommended = models.filter((model) => isRecommended(model.id));
+  // Nothing recommended in this key's catalogue: showing an empty list with a
+  // "show all" button under it would be a riddle.
+  const shown = showAll || recommended.length === 0 ? models : recommended;
+
+  const label = (model: ModelInfo): string => {
+    const limits = limitsFor(model.id, readObservedLimit(model.id));
+    if (!limits) return model.displayName;
+    const mark = limits.source === "estimated" ? "~" : "";
+    return `${model.displayName} — ${mark}${limits.rpd}/${t("perDay")}`;
+  };
+
+  return (
+    <div className="flex flex-col gap-2">
+      <Label htmlFor="model">{t("model")}</Label>
+      <select
+        id="model"
+        className="h-10 rounded-lg border border-input bg-background px-3"
+        value={value ?? defaultModel(shown)?.id ?? ""}
+        onChange={(event) => {
+          writeModelId(event.target.value);
+          onChange(event.target.value);
+        }}
+      >
+        {shown.map((model) => (
+          <option key={model.id} value={model.id}>
+            {label(model)}
+          </option>
+        ))}
+      </select>
+
+      {recommended.length > 0 && recommended.length < models.length && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="self-start text-muted-foreground"
+          aria-pressed={showAll}
+          onClick={() => setShowAll((current) => !current)}
+        >
+          {showAll ? t("modelRecommended") : t("modelShowAll")}
+        </Button>
+      )}
+
+      {value && estimatedLimits(value) === null && (
+        <p className="text-xs text-muted-foreground">{t("limitUnknown")}</p>
+      )}
+    </div>
   );
 }

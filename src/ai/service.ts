@@ -16,6 +16,7 @@ import type { MediaPart } from "./core/provider.ts";
 import { checkBudget, record } from "./runtime/ledger.ts";
 import { readApiKey, readModelId } from "./runtime/key.ts";
 import { getQueue } from "./runtime/queue.ts";
+import { noteObservedLimit } from "./runtime/quota.ts";
 
 /**
  * The single door between the app and a model.
@@ -74,6 +75,16 @@ async function run<T>(
     return outcome.value;
   } catch (error) {
     const aiError = asAiError(error);
+
+    /**
+     * A refusal is the one moment the API states what this key is allowed.
+     *
+     * Google no longer publishes per-model limits, so the number in a
+     * `QuotaFailure` is the only authoritative one there is. Kept against the
+     * model that earned it, and from then on the usage meter stops guessing.
+     */
+    const modelId = readModelId();
+    if (aiError.quota && modelId) noteObservedLimit(modelId, aiError.quota);
     // A request that never left — blocked by a gate — is not spend, so it is
     // not recorded. Anything that reached the wire is.
     if (aiError.code !== "local_cap" && aiError.code !== "daily_quota") {

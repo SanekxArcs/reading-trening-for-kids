@@ -11,6 +11,7 @@ import { getStoredQuestions } from "./questionSource.ts";
 import { resolveAnswers } from "./resolveAnswers.ts";
 import { useSpeech } from "@/voice/useSpeech";
 import { ModeChoice } from "@/components/ModeChoice";
+import { QuickToggles } from "@/components/QuickToggles";
 import {
   finishSession,
   getSession,
@@ -209,6 +210,9 @@ function QuizBody({ loaded, settings, update, navigate, t }: BodyProps) {
           {/* The points the child is actually playing for, climbing in front of
               them. Without this the whole scoring layer is invisible, which is
               the same as not existing. */}
+          <div className="flex items-center gap-1">
+            <QuickToggles settings={settings} update={update} />
+          </div>
           <span className="font-display text-sm font-bold tabular-nums text-combo">
             {round.goalEnabled
               ? t("pointsOfGoal", {

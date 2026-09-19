@@ -175,7 +175,15 @@ export const DAILY_QUOTA_BODY = {
     details: [
       {
         "@type": "type.googleapis.com/google.rpc.QuotaFailure",
-        violations: [{ quotaId: "GenerateRequestsPerDayPerProjectPerModel" }],
+        violations: [
+          {
+            quotaId: "GenerateRequestsPerDayPerProjectPerModel-FreeTier",
+            quotaMetric: "generativelanguage.googleapis.com/generate_content_free_tier_requests",
+            // The allowance itself. The only place a per-model limit is stated
+            // now that the documentation prints none.
+            quotaValue: "500",
+          },
+        ],
       },
     ],
   },
