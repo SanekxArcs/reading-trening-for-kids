@@ -39,15 +39,11 @@ export function countChars(text: string): number {
  *
  * Detection by distinctive characters rather than by word lists: it is a few
  * lines, it needs no dictionary, and it cannot be fooled by a text that happens
- * to contain a foreign name. The order of the checks matters — Ukrainian and
- * Russian share most of their alphabet, so the decision rests on the letters
- * that differ.
+ * to contain a foreign name.
  */
 const MARKERS: Record<TextLang, RegExp> = {
   uk: /[іїєґ]/iu,
-  ru: /[ыъэё]/iu,
   pl: /[ąćęłńóśźż]/iu,
-  cs: /[ěščřžůýáíé]/iu,
   en: /^$/u, // never matches; English is the fallback for plain Latin
 };
 
@@ -59,23 +55,12 @@ const MARKERS: Record<TextLang, RegExp> = {
  * Polish answer with Ukrainian suffixes and quietly grading a child unfairly.
  */
 export function guessLanguage(text: string): TextLang {
-  const cyrillic = /\p{Script=Cyrillic}/u.test(text);
-
-  if (cyrillic) {
-    const uk = (text.match(/[іїєґ]/giu) ?? []).length;
-    const ru = (text.match(/[ыъэё]/giu) ?? []).length;
-    if (uk > ru) return "uk";
-    if (ru > uk) return "ru";
-    // Neither marker appeared: a short Cyrillic text using only shared letters.
-    // Ukrainian is the house default, and the parent can correct it.
-    return "uk";
-  }
-
-  if (MARKERS.pl.test(text)) {
-    // Czech and Polish overlap on ó and ż/ž; the distinctly Czech carons decide.
-    return /[ěščřůý]/iu.test(text) ? "cs" : "pl";
-  }
-  if (MARKERS.cs.test(text)) return "cs";
+  // Any Cyrillic is Ukrainian here, because it is the only Cyrillic language
+  // the app reads. A Russian text pasted in is stemmed with Ukrainian suffixes
+  // rather than refused — close enough to grade fairly, and the guess sits next
+  // to a picker with all three languages on it.
+  if (/\p{Script=Cyrillic}/u.test(text)) return "uk";
+  if (MARKERS.pl.test(text)) return "pl";
   return "en";
 }
 

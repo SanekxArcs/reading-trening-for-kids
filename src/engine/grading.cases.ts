@@ -66,14 +66,11 @@ export const GRADING_CASES: readonly GradingCase[] = [
     note: "the same answer once the question lists the case a child would actually type",
   },
   { lang: "pl", accepted: ["żółw"], typed: "żółwiem", want: "correct", note: "instrumental" },
-  { lang: "ru", accepted: ["лиса"], typed: "лису", want: "correct", note: "accusative" },
-  { lang: "cs", accepted: ["liška"], typed: "lišku", want: "correct", note: "accusative" },
 
   // ─── Diacritics a plain keyboard cannot produce ──────────────────────────
   { lang: "pl", accepted: ["żółw"], typed: "zolw", want: "correct", note: "no Polish keyboard" },
   { lang: "pl", accepted: ["źrebię"], typed: "zrebie", want: "correct", note: "no diacritics" },
   { lang: "uk", accepted: ["їжак"], typed: "ижак", want: "correct", note: "ї typed as и" },
-  { lang: "cs", accepted: ["řeka"], typed: "reka", want: "correct", note: "no carons" },
 
   // ─── Typing mistakes ─────────────────────────────────────────────────────
   { lang: "uk", accepted: ["лисиця"], typed: "лисеця", want: "correct", note: "vowel typo" },

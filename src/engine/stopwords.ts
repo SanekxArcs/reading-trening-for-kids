@@ -19,13 +19,6 @@ const LISTS: Record<TextLang, readonly string[]> = {
     "для", "по", "за", "під", "над", "при", "про", "без", "через", "між", "біля", "після",
     "перед", "був", "була", "було", "були", "є", "буде", "бути", "має", "мав",
   ],
-  ru: [
-    "и", "а", "но", "или", "что", "чтобы", "как", "когда", "где", "не", "ни", "это",
-    "этот", "эта", "то", "тот", "так", "там", "тут", "уже", "еще", "тоже", "все", "он",
-    "она", "оно", "они", "я", "ты", "мы", "вы", "его", "ее", "их", "в", "на",
-    "с", "со", "до", "от", "для", "по", "за", "под", "над", "при", "про", "без",
-    "через", "между", "около", "после", "перед", "был", "была", "было", "были", "есть", "будет", "быть",
-  ],
   pl: [
     "i", "a", "ale", "lub", "albo", "że", "żeby", "jak", "gdy", "kiedy", "gdzie", "bo",
     "nie", "to", "ten", "ta", "tam", "tu", "już", "jeszcze", "też", "wszystko", "się", "on",
@@ -33,13 +26,6 @@ const LISTS: Record<TextLang, readonly string[]> = {
     "na", "z", "ze", "do", "od", "dla", "po", "za", "pod", "nad", "przy", "o",
     "bez", "przez", "między", "obok", "przed", "był", "była", "było", "byli", "jest", "są", "będzie",
     "być", "ma", "miał",
-  ],
-  cs: [
-    "a", "ale", "nebo", "že", "aby", "jak", "když", "kde", "protože", "ne", "to", "ten",
-    "ta", "tam", "tady", "už", "ještě", "taky", "všechno", "se", "on", "ona", "ono", "oni",
-    "já", "ty", "my", "vy", "jeho", "její", "jejich", "v", "ve", "na", "s", "se",
-    "do", "od", "pro", "po", "za", "pod", "nad", "při", "o", "bez", "přes", "mezi",
-    "vedle", "před", "byl", "byla", "bylo", "byli", "je", "jsou", "bude", "být", "má", "měl",
   ],
   en: [
     "the", "a", "an", "and", "or", "but", "that", "which", "who", "whom", "whose", "if",
@@ -62,9 +48,7 @@ const LISTS: Record<TextLang, readonly string[]> = {
  */
 const SETS: Record<TextLang, ReadonlySet<string>> = {
   uk: new Set(LISTS.uk.map(fold)),
-  ru: new Set(LISTS.ru.map(fold)),
   pl: new Set(LISTS.pl.map(fold)),
-  cs: new Set(LISTS.cs.map(fold)),
   en: new Set(LISTS.en.map(fold)),
 };
 

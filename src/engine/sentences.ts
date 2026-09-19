@@ -24,8 +24,6 @@ const ABBREVIATIONS: Record<TextLang, readonly string[]> = {
   uk: ["т", "тобто", "напр", "ім", "вул", "просп", "обл", "р", "рр", "ст", "стор", "гр", "проф"],
   pl: ["np", "itd", "itp", "tj", "tzn", "ul", "al", "dr", "prof", "godz", "str", "ok", "por"],
   en: ["mr", "mrs", "ms", "dr", "prof", "st", "vs", "etc", "eg", "ie", "fig", "no", "vol"],
-  ru: ["т", "напр", "им", "ул", "просп", "обл", "г", "гг", "ст", "стр", "проф", "др"],
-  cs: ["např", "atd", "apod", "tj", "tzn", "ul", "dr", "prof", "str", "obr", "č", "mj"],
 };
 
 /** Sentence-ending punctuation, including the ellipsis as one character. */

@@ -116,9 +116,7 @@ describe("words", () => {
 describe("guessLanguage", () => {
   it.each([
     ["Лисиця побігла до лісу, бо її кликали друзі.", "uk"],
-    ["Лисица побежала в лес, потому что её звали друзья.", "ru"],
     ["Lisica pobiegła do lasu, żeby znaleźć jedzenie.", "pl"],
-    ["Liška běžela do lesa, protože ji volali přátelé.", "cs"],
     ["The fox ran into the forest to find some food.", "en"],
   ])("recognises %s", (text, expected) => {
     expect(guessLanguage(text)).toBe(expected);
@@ -126,6 +124,15 @@ describe("guessLanguage", () => {
 
   it("falls back to Ukrainian for Cyrillic with no distinguishing letters", () => {
     expect(guessLanguage("Мама мала раму")).toBe("uk");
+  });
+
+  /**
+   * Ukrainian is the only Cyrillic language the app reads now. A Russian text
+   * is stemmed with Ukrainian suffixes rather than refused — close enough to
+   * grade fairly, and the parent sees the guess beside a picker.
+   */
+  it("reads any other Cyrillic as Ukrainian rather than refusing it", () => {
+    expect(guessLanguage("Лисица побежала в лес, потому что её звали друзья.")).toBe("uk");
   });
 });
 

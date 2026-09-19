@@ -12,6 +12,7 @@ import { resolveAnswers } from "./resolveAnswers.ts";
 import { useSpeech } from "@/voice/useSpeech";
 import { ModeChoice } from "@/components/ModeChoice";
 import { QuickToggles } from "@/components/QuickToggles";
+import { LeaveButton } from "@/components/LeaveButton";
 import {
   finishSession,
   getSession,
@@ -203,7 +204,11 @@ function QuizBody({ loaded, settings, update, navigate, t }: BodyProps) {
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-2xl flex-col gap-6 p-4">
       <header className="flex flex-col gap-2">
-        <div className="flex items-baseline justify-between gap-2">
+        <div className="flex items-center justify-between gap-2">
+          {/* The round is abandoned rather than scored: the session keeps its
+              `finishedAt` of null, so a test nobody finished never turns into a
+              comprehension percentage on the progress screen. */}
+          <LeaveButton onLeave={() => navigate("/", { replace: true })} />
           <p className="text-sm text-muted-foreground">
             {t("questionOf", { current: state.index + 1, total: questions.length })}
           </p>

@@ -12,8 +12,6 @@ export const TEXT_LANG_NAMES: Record<TextLang, string> = {
   uk: "Українська",
   pl: "Polski",
   en: "English",
-  ru: "Русский",
-  cs: "Čeština",
 };
 
 /**

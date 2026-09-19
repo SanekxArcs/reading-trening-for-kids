@@ -81,13 +81,14 @@ export type TextSource = "paste" | "ocr" | "generated" | "sample";
  * interface. A Ukrainian family in Poland reads Polish school texts through a
  * Ukrainian UI, and the questions must follow the text, never the UI.
  *
- * Russian and Czech are here because they cost almost nothing — the stemmer and
- * the matcher are table-driven — and because a text in either will otherwise be
- * silently mis-stemmed as Ukrainian or Polish.
+ * Three, deliberately: English as the base, plus Ukrainian and Polish. Each one
+ * costs a stopword list, a suffix table, an abbreviation list and rows in the
+ * grading fixtures — and a language nobody reads is a table nobody checks. A
+ * fourth is a small piece of deliberate work, not a line in an array.
  */
-export type TextLang = "uk" | "pl" | "en" | "ru" | "cs";
+export type TextLang = "uk" | "pl" | "en";
 
-export const TEXT_LANGS: readonly TextLang[] = ["uk", "pl", "en", "ru", "cs"];
+export const TEXT_LANGS: readonly TextLang[] = ["uk", "pl", "en"];
 
 /** One sentence of a text, with the offsets it occupied in the original. */
 export interface Sentence {

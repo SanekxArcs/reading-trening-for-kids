@@ -51,8 +51,6 @@ const LOCALES: Record<TextLang, string> = {
   uk: "uk-UA",
   pl: "pl-PL",
   en: "en-GB",
-  ru: "ru-RU",
-  cs: "cs-CZ",
 };
 
 export type SpeechPhase = "unsupported" | "idle" | "listening" | "denied";

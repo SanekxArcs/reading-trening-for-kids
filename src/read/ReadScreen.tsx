@@ -1,6 +1,16 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, BookOpen, Mic, Minus, Pause, Play, Plus } from "lucide-react";
+import {
+  ArrowLeft,
+  BookOpen,
+  Eraser,
+  Highlighter,
+  Mic,
+  Minus,
+  Pause,
+  Play,
+  Plus,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useI18n } from "@/i18n/useI18n";
@@ -18,6 +28,8 @@ import { useRecorder } from "@/voice/useRecorder";
 import { aiContext, isAiConfigured, requestReadAloud } from "@/ai/service";
 import { ModeChoice } from "@/components/ModeChoice";
 import { QuickToggles } from "@/components/QuickToggles";
+import { LeaveButton } from "@/components/LeaveButton";
+import { ReadingCanvas, type ReadingCanvasHandle } from "./ReadingCanvas.tsx";
 import { splitSentences } from "@/engine";
 import { countChars, speedFlag, warmupWords, type StoredText } from "@/engine";
 
@@ -48,6 +60,16 @@ export function ReadScreen() {
 
   const [text, setText] = useState<StoredText | null>(null);
   const [starting, setStarting] = useState(false);
+
+  /**
+   * The finger-under-the-line, for a child who keeps losing their place.
+   *
+   * Off until asked for, because while it is on the page cannot be scrolled —
+   * the canvas has to take the touches to draw with them.
+   */
+  const [pen, setPen] = useState(false);
+  const [hasInk, setHasInk] = useState(false);
+  const canvas = useRef<ReadingCanvasHandle | null>(null);
 
   useEffect(() => {
     if (!textId) return;
@@ -249,6 +271,9 @@ export function ReadScreen() {
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col gap-4 p-4">
       <header className="flex items-center justify-between gap-2">
+        {/* No session exists yet while the clock is running, so leaving costs
+            nothing but the time — nothing half-recorded is left behind. */}
+        <LeaveButton onLeave={() => navigate("/", { replace: true })} />
         <span
           className="font-mono text-lg tabular-nums text-muted-foreground"
           role="timer"
@@ -258,6 +283,28 @@ export function ReadScreen() {
         </span>
 
         <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-pressed={pen}
+            aria-label={t("draw")}
+            title={t("draw")}
+            className={pen ? "text-primary" : "text-muted-foreground"}
+            onClick={() => setPen((current) => !current)}
+          >
+            <Highlighter />
+          </Button>
+          {hasInk && (
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={t("drawClear")}
+              title={t("drawClear")}
+              onClick={() => canvas.current?.clear()}
+            >
+              <Eraser />
+            </Button>
+          )}
           <QuickToggles settings={settings} update={update} />
           {aloud && recorder.phase === "recording" && (
             <Mic className="size-4 animate-pulse text-wrong" aria-label={t("listening")} />
@@ -302,14 +349,25 @@ export function ReadScreen() {
           </CardContent>
         </Card>
       ) : (
-        <article
-          className="whitespace-pre-wrap font-sans"
-          style={readingStyle}
-          lang={text.lang}
-          data-dyslexic={settings.dyslexicFont || undefined}
-        >
-          {text.body}
-        </article>
+        <div className="relative">
+          <article
+            className="whitespace-pre-wrap font-sans"
+            style={readingStyle}
+            lang={text.lang}
+            data-dyslexic={settings.dyslexicFont || undefined}
+          >
+            {text.body}
+          </article>
+          {/* Keyed on everything that reflows the text: a new key is a new
+              canvas, which is the simplest possible wipe and the only one that
+              cannot leave a mark pointing at the wrong word. */}
+          <ReadingCanvas
+            key={`${settings.fontScale}-${settings.lineHeight}-${String(settings.dyslexicFont)}`}
+            active={pen}
+            handle={canvas}
+            onInk={setHasInk}
+          />
+        </div>
       )}
 
       <div className="sticky bottom-4 mt-auto pt-4">

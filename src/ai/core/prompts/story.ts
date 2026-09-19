@@ -45,8 +45,6 @@ const LANGUAGE_NAMES: Record<TextLang, string> = {
   uk: "Ukrainian",
   pl: "Polish",
   en: "English",
-  ru: "Russian",
-  cs: "Czech",
 };
 
 export interface StoryPromptInput {
