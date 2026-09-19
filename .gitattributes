@@ -1,0 +1,4 @@
+# Prettier is configured for LF, and format:check runs in CI on a fresh
+# checkout. Without this, Git hands Windows a CRLF working copy and every
+# file fails the check nobody changed.
+* text=auto eol=lf

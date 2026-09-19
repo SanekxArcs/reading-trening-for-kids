@@ -189,6 +189,31 @@
   }
 }
 
+/*
+  The dyslexia-friendly reading setting.
+
+  No font is shipped for it, and that is a decision rather than an omission.
+  OpenDyslexic is a megabyte-class download whose measured benefit over an
+  ordinary sans is, at best, not established — while the spacing changes below
+  are supported by the evidence that does exist, cost nothing to download and
+  work on a phone that has been offline for a week. If the family has installed
+  OpenDyslexic or Lexend themselves, the stack picks it up.
+
+  Applied only where `data-dyslexic` is set, which is the text being read and
+  the warm-up words: it is a reading aid, not a theme, and spreading it over
+  buttons and headings would only make the page harder to scan.
+*/
+[data-dyslexic] {
+  font-family: "OpenDyslexic", "Lexend", "Atkinson Hyperlegible", Verdana, Tahoma, var(--font-sans);
+  letter-spacing: 0.08em;
+  word-spacing: 0.22em;
+  /* Left-aligned and unjustified: even word gaps beat straight right edges,
+     and the "rivers" justification opens up are exactly what the spacing
+     above is trying to avoid. */
+  text-align: left;
+  text-wrap: pretty;
+}
+
 /* Respect the OS setting. Everything animated must still be usable at 0s. */
 @media (prefers-reduced-motion: reduce) {
   *,

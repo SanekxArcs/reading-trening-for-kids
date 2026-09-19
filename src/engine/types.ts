@@ -67,8 +67,50 @@ export type ReadingMode =
 /** How the child gives an answer. */
 export type AnswerMode = "type" | "voice";
 
-/** Where a text came from, kept so the library can show it and OCR can be redone. */
-export type TextSource = "paste" | "ocr" | "sample";
+/**
+ * Where a text came from.
+ *
+ * Worth keeping: a bad transcription traces back to the photos rather than to
+ * a parent's typing, and a generated story is one the app itself is
+ * accountable for.
+ */
+export type TextSource = "paste" | "ocr" | "generated" | "sample";
+
+/**
+ * The language of a *text*, which is a different thing from the language of the
+ * interface. A Ukrainian family in Poland reads Polish school texts through a
+ * Ukrainian UI, and the questions must follow the text, never the UI.
+ *
+ * Russian and Czech are here because they cost almost nothing — the stemmer and
+ * the matcher are table-driven — and because a text in either will otherwise be
+ * silently mis-stemmed as Ukrainian or Polish.
+ */
+export type TextLang = "uk" | "pl" | "en" | "ru" | "cs";
+
+export const TEXT_LANGS: readonly TextLang[] = ["uk", "pl", "en", "ru", "cs"];
+
+/** One sentence of a text, with the offsets it occupied in the original. */
+export interface Sentence {
+  index: number;
+  text: string;
+  /** Offsets into the source text, so a result screen can highlight in place. */
+  start: number;
+  end: number;
+}
+
+/** A text in the library. */
+export interface StoredText {
+  id: string;
+  title: string;
+  body: string;
+  lang: TextLang;
+  source: TextSource;
+  /** Normalised content hash; two pastes of the same page share it. */
+  hash: string;
+  wordCount: number;
+  sentenceCount: number;
+  createdAt: number;
+}
 
 /**
  * One question about one text.
