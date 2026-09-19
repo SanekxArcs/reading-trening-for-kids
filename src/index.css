@@ -1,0 +1,202 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+  Kid-facing theme. Deliberately higher chroma and larger radii than the shadcn
+  default: the target user is 7 and plays on a tablet held at arm's length.
+  Semantic pairs (correct/wrong/combo) are tokens rather than raw utilities so
+  the game never hardcodes a colour it might need to theme later.
+*/
+:root {
+  --radius: 1.5rem;
+
+  --background: oklch(0.98 0.015 195);
+  --foreground: oklch(0.28 0.05 285);
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.28 0.05 285);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.28 0.05 285);
+
+  --primary: oklch(0.55 0.13 185);
+  --primary-foreground: oklch(0.99 0.01 190);
+  --secondary: oklch(0.95 0.03 190);
+  --secondary-foreground: oklch(0.35 0.09 190);
+
+  --muted: oklch(0.96 0.015 190);
+  --muted-foreground: oklch(0.52 0.03 190);
+  --accent: oklch(0.93 0.06 320);
+  --accent-foreground: oklch(0.32 0.1 190);
+
+  --destructive: oklch(0.62 0.23 22);
+  --destructive-foreground: oklch(0.99 0.01 190);
+
+  --border: oklch(0.92 0.02 190);
+  --input: oklch(0.92 0.02 190);
+  --ring: oklch(0.62 0.19 185);
+
+  /* Game semantics */
+  --correct: oklch(0.68 0.17 152);
+  --correct-foreground: oklch(0.99 0.01 150);
+  --wrong: oklch(0.63 0.23 18);
+  --wrong-foreground: oklch(0.99 0.01 20);
+  --combo: oklch(0.78 0.17 75);
+  --combo-foreground: oklch(0.3 0.08 60);
+  --streak-bad: oklch(0.55 0.2 10);
+
+  /* Chart series. Single-series charts throughout, so there is no categorical
+     adjacency to clear; both steps were checked with the dataviz validator
+     against their own surface (light on #ffffff, dark on the dark card). */
+  --chart-series: #0f766e;
+  --chart-grid: oklch(0.92 0.02 190);
+  --chart-empty: oklch(0.95 0.01 190);
+
+  /* Ordinal mastery ramp, one hue, light to dark. Validated against the card
+     surface; "unseen" is not part of the ramp because it is a different
+     category, not a lower value — it gets no fill at all. */
+  --mastery-1: #99f6e4;
+  --mastery-2: #2dd4bf;
+  --mastery-3: #0f766e;
+
+  /* Per-question-type hues, indexed 0..4: literal, sequence, vocabulary,
+     inference, main idea. Index 5 is spare. */
+  --qtype-0: oklch(0.7 0.15 240);
+  --qtype-1: oklch(0.78 0.15 80);
+  --qtype-2: oklch(0.68 0.16 300);
+  --qtype-3: oklch(0.72 0.16 350);
+  --qtype-4: oklch(0.72 0.15 325);
+  --qtype-5: oklch(0.74 0.15 40);
+}
+
+.dark {
+  --background: oklch(0.21 0.03 190);
+  --foreground: oklch(0.96 0.01 190);
+
+  --card: oklch(0.26 0.035 190);
+  --card-foreground: oklch(0.96 0.01 190);
+  --popover: oklch(0.26 0.035 190);
+  --popover-foreground: oklch(0.96 0.01 190);
+
+  --primary: oklch(0.72 0.11 185);
+  --primary-foreground: oklch(0.18 0.04 190);
+  --secondary: oklch(0.32 0.04 190);
+  --secondary-foreground: oklch(0.96 0.01 190);
+
+  --muted: oklch(0.3 0.03 190);
+  --muted-foreground: oklch(0.7 0.03 185);
+  --accent: oklch(0.36 0.07 195);
+  --accent-foreground: oklch(0.97 0.01 190);
+
+  --destructive: oklch(0.6 0.2 22);
+  --destructive-foreground: oklch(0.98 0.01 20);
+
+  --border: oklch(0.35 0.03 190);
+  --input: oklch(0.35 0.03 190);
+  --ring: oklch(0.65 0.16 185);
+
+  --correct: oklch(0.66 0.16 152);
+  --wrong: oklch(0.62 0.21 18);
+  --combo: oklch(0.75 0.16 75);
+  --combo-foreground: oklch(0.2 0.05 60);
+  --streak-bad: oklch(0.58 0.19 10);
+
+  --chart-series: #5eead4;
+  --chart-grid: oklch(0.35 0.03 190);
+  --chart-empty: oklch(0.32 0.03 190);
+
+  --mastery-1: #134e4a;
+  --mastery-2: #0d9488;
+  --mastery-3: #5eead4;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-correct: var(--correct);
+  --color-correct-foreground: var(--correct-foreground);
+  --color-wrong: var(--wrong);
+  --color-wrong-foreground: var(--wrong-foreground);
+  --color-combo: var(--combo);
+  --color-combo-foreground: var(--combo-foreground);
+  --color-streak-bad: var(--streak-bad);
+
+  --color-chart-series: var(--chart-series);
+  --color-chart-grid: var(--chart-grid);
+  --color-chart-empty: var(--chart-empty);
+  --color-mastery-1: var(--mastery-1);
+  --color-mastery-2: var(--mastery-2);
+  --color-mastery-3: var(--mastery-3);
+
+  --radius-sm: calc(var(--radius) - 8px);
+  --radius-md: calc(var(--radius) - 4px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 8px);
+
+  --font-display: "Baloo 2", "Fredoka", system-ui, sans-serif;
+  --font-sans: "Nunito", system-ui, sans-serif;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    /* Stops double-tap zoom fighting the answer buttons on tablets. */
+    touch-action: manipulation;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    /* Safe areas so the numpad clears the iOS home indicator. */
+    padding-bottom: env(safe-area-inset-bottom);
+    overscroll-behavior: none;
+  }
+
+  /* A 7-year-old drags and long-presses everything. Don't let that select text
+     or pop the iOS callout mid-question. */
+  button,
+  [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    user-select: none;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
+}
+
+/* Respect the OS setting. Everything animated must still be usable at 0s. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
