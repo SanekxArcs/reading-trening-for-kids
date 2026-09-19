@@ -25,6 +25,12 @@ const ProgressScreen = lazy(() =>
 const QuestionReviewScreen = lazy(() =>
   import("./library/QuestionReviewScreen.tsx").then((m) => ({ default: m.QuestionReviewScreen })),
 );
+const ShareScreen = lazy(() =>
+  import("./share/ShareScreen.tsx").then((m) => ({ default: m.ShareScreen })),
+);
+const ImportScreen = lazy(() =>
+  import("./share/ImportScreen.tsx").then((m) => ({ default: m.ImportScreen })),
+);
 
 export default function App() {
   // Mounted once, at the root: the theme must be applied before any screen
@@ -37,6 +43,8 @@ export default function App() {
         <Route path="/" element={<HomeScreen />} />
         <Route path="/add" element={<AddTextScreen />} />
         <Route path="/review/:textId" element={<QuestionReviewScreen />} />
+        <Route path="/share/:textId" element={<ShareScreen />} />
+        <Route path="/import" element={<ImportScreen />} />
         <Route path="/read/:textId" element={<ReadScreen />} />
         <Route path="/quiz/:sessionId" element={<QuizScreen />} />
         <Route path="/result/:sessionId" element={<ResultScreen />} />

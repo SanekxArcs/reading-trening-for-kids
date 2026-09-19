@@ -16,7 +16,7 @@ import {
   saveQuestionSet,
 } from "@/data/repositories";
 import type { StoredQuestionSet } from "@/data/db";
-import { localSetKey, questionSetKey } from "@/ai/core/cacheKey";
+import { importedSetKey, localSetKey, questionSetKey } from "@/ai/core/cacheKey";
 import { asAiError, type AiErrorCode } from "@/ai/core/errors";
 import { aiContext, requestQuestions } from "@/ai/service";
 
@@ -129,7 +129,18 @@ export async function getQuestionsFor(
     ? questionSetKey({ text: text.body, level: settings.level, modelId: context.modelId, count })
     : null;
 
-  for (const key of [modelKey, localKey(text, settings, count)]) {
+  /**
+   * An imported set outranks anything this device would make.
+   *
+   * Two children handed the same pack have to be asked the same questions, so
+   * a set that arrived from somebody else is used as it is — never regenerated,
+   * never supplemented, and never quietly replaced by a local one.
+   */
+  for (const key of [
+    importedSetKey({ text: text.body, level: settings.level }),
+    modelKey,
+    localKey(text, settings, count),
+  ]) {
     if (!key) continue;
     const set = await getQuestionSet(key);
     if (!set || set.questions.length === 0) continue;

@@ -166,6 +166,49 @@ export const listQuestionSets = (): Promise<StoredQuestionSet[]> =>
 export const saveReviewedQuestions = (cacheKey: string, questions: Question[]): Promise<boolean> =>
   safeWrite(() => db.questionSets.update(cacheKey, { questions, approved: true }));
 
+/**
+ * A text and its questions, arrived from somebody else.
+ *
+ * Saved approved: the sender already looked at these, and asking the receiving
+ * parent to re-approve them would invite edits — at which point the two
+ * children are no longer taking the same test, which was the whole point of
+ * sending it.
+ *
+ * The text de-duplicates on its hash like any other, so importing the same
+ * pack twice, or a pack of a text already in the library, adds one library
+ * card rather than two and keeps the history that card already has.
+ */
+export async function saveImportedPack(input: {
+  cacheKey: string;
+  title: string;
+  body: string;
+  lang: TextLang;
+  level: ChildLevel;
+  questions: Question[];
+  producedBy: string;
+}): Promise<StoredText | null> {
+  const text = await saveText({
+    body: input.body,
+    title: input.title,
+    lang: input.lang,
+    source: "shared",
+  });
+  if (!text) return null;
+
+  const saved = await safeWrite(() =>
+    db.questionSets.put({
+      cacheKey: input.cacheKey,
+      textId: text.id,
+      level: input.level,
+      questions: input.questions,
+      producedBy: input.producedBy,
+      approved: true,
+      createdAt: Date.now(),
+    }),
+  );
+  return saved ? text : null;
+}
+
 // ─── Sessions and answers ─────────────────────────────────────────────────
 
 export interface NewSession {

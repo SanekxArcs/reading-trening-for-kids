@@ -4,8 +4,10 @@ import {
   BookOpen,
   ChevronRight,
   ClipboardCheck,
+  PackageOpen,
   Plus,
   Settings as SettingsIcon,
+  Share2,
   TrendingUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -79,12 +81,22 @@ export function HomeScreen() {
         </div>
       </header>
 
-      <Button asChild size="lg" className="h-16 text-xl">
-        <Link to="/add">
-          <Plus />
-          {t("addText")}
-        </Link>
-      </Button>
+      <div className="flex flex-col gap-2">
+        <Button asChild size="lg" className="h-16 text-xl">
+          <Link to="/add">
+            <Plus />
+            {t("addText")}
+          </Link>
+        </Button>
+        {/* The other way a text arrives: somebody sent one. Quiet next to the
+            main button, because most evenings it is not the way in. */}
+        <Button asChild variant="ghost" className="self-center text-muted-foreground">
+          <Link to="/import">
+            <PackageOpen />
+            {t("importTitle")}
+          </Link>
+        </Button>
+      </div>
 
       {texts === null ? null : texts.length === 0 ? (
         <Card>
@@ -127,6 +139,17 @@ export function HomeScreen() {
                       </span>
                       <ChevronRight className="size-5 shrink-0 text-muted-foreground" aria-hidden />
                     </Link>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {/* Sharing is a grown-up action and the screen behind it
+                          asks for the PIN; the chip stays small so it is not
+                          the thing a child aims at. */}
+                      <Button asChild variant="ghost" size="xs" className="text-muted-foreground">
+                        <Link to={`/share/${text.id}`}>
+                          <Share2 />
+                          {t("shareTitle")}
+                        </Link>
+                      </Button>
+                    </div>
                     {wantsReview(text.id) && (
                       <Link
                         to={`/review/${text.id}`}

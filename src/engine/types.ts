@@ -71,10 +71,11 @@ export type AnswerMode = "type" | "voice";
  * Where a text came from.
  *
  * Worth keeping: a bad transcription traces back to the photos rather than to
- * a parent's typing, and a generated story is one the app itself is
- * accountable for.
+ * a parent's typing, a generated story is one the app itself is accountable
+ * for, and a shared one came with its questions already written by somebody
+ * else — which is why it is never regenerated.
  */
-export type TextSource = "paste" | "ocr" | "generated" | "sample";
+export type TextSource = "paste" | "ocr" | "generated" | "shared" | "sample";
 
 /**
  * The language of a *text*, which is a different thing from the language of the

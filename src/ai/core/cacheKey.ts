@@ -38,3 +38,17 @@ export function questionSetKey(input: QuestionSetKeyInput): string {
 export function localSetKey(input: Omit<QuestionSetKeyInput, "modelId">): string {
   return questionSetKey({ ...input, modelId: "local" });
 }
+
+/**
+ * A set that arrived from somebody else.
+ *
+ * Its own namespace, and deliberately without `count` or the prompt version:
+ * an imported set is a fixed object that a person chose and another person is
+ * about to answer, not something this app regenerates. Two children given the
+ * same pack must be asked the same questions, so nothing about *this* device —
+ * its model, its prompt, how many questions it would have asked for — may
+ * enter the key.
+ */
+export function importedSetKey(input: { text: string; level: ChildLevel }): string {
+  return [textHash(input.text), input.level, "shared"].join(":");
+}
