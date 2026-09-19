@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,6 +9,7 @@ import { dailyBudget, limitsFor } from "@/ai/core/modelLimits";
 import { readCaps, recentDays, writeCaps } from "@/ai/runtime/ledger";
 import { readObservedLimit } from "@/ai/runtime/quota";
 import { readModelId } from "@/ai/runtime/key";
+import { clearLastFailure, readLastFailure } from "@/ai/runtime/diagnostics";
 
 /**
  * What the key was spent on, against what this model actually allows.
@@ -27,6 +29,7 @@ export function UsageCard() {
   const [days, setDays] = useState<DayLedger[]>([]);
   const [cap, setCap] = useState(() => readCaps().maxRequestsPerDay);
   const [modelId] = useState(() => readModelId());
+  const [failure, setFailure] = useState(() => readLastFailure());
 
   useEffect(() => {
     void recentDays(7).then(setDays);
@@ -105,6 +108,34 @@ export function UsageCard() {
               </li>
             ))}
           </ul>
+        )}
+
+        {/* What actually went wrong, for the grown-up. The message the app
+            shows during a session is short on purpose and says nothing a bug
+            report could use. */}
+        {failure && (
+          <details className="rounded-lg bg-muted p-3 text-xs">
+            <summary className="cursor-pointer text-muted-foreground">
+              {t("lastError", {
+                answer: failure.code,
+                when: new Date(failure.at).toLocaleString(),
+              })}
+            </summary>
+            <p className="mt-2 break-words font-mono text-[11px]">
+              {failure.label}: {failure.detail}
+            </p>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mt-2"
+              onClick={() => {
+                clearLastFailure();
+                setFailure(null);
+              }}
+            >
+              {t("close")}
+            </Button>
+          </details>
         )}
 
         <div className="flex items-center justify-between gap-4">

@@ -141,6 +141,7 @@ const en = {
   modelRecommended: "Recommended",
   modelShowAll: "Show every model",
   perDay: "a day",
+  lastError: "Last problem: {answer} · {when}",
   limitUnknown:
     "No limit is known for this model. The app will learn it the first time Gemini refuses a request.",
   reviewQuestions: "Review questions before my child sees them",
@@ -311,6 +312,7 @@ const uk: Record<TranslationKey, string> = {
   modelRecommended: "Рекомендовані",
   modelShowAll: "Показати всі моделі",
   perDay: "на день",
+  lastError: "Остання проблема: {answer} · {when}",
   limitUnknown:
     "Ліміт цієї моделі невідомий. Застосунок дізнається його, коли Gemini вперше відмовить у запиті.",
   reviewQuestions: "Переглядати питання перед тим, як їх побачить дитина",
@@ -476,6 +478,7 @@ const pl: Record<TranslationKey, string> = {
   modelRecommended: "Zalecane",
   modelShowAll: "Pokaż wszystkie modele",
   perDay: "dziennie",
+  lastError: "Ostatni problem: {answer} · {when}",
   limitUnknown:
     "Limit tego modelu jest nieznany. Aplikacja pozna go, gdy Gemini pierwszy raz odmówi.",
   reviewQuestions: "Przeglądaj pytania, zanim zobaczy je dziecko",

@@ -36,14 +36,17 @@ export interface GenerateOutcome {
 }
 
 /**
- * Sized per call, and the main defence against truncation.
+ * Sized per call, generously.
  *
- * A question with its answers, keywords and rationale runs to roughly 180
- * tokens; the constant covers the wrapper. Asking for far more than needed is
- * not free — on a thinking model the budget competes with the answer.
+ * A question with its answers, keywords and rationale runs to something over
+ * two hundred tokens and the constant covers the wrapper — but the number that
+ * matters is the one added on top of this in `withThinkingRoom`, because
+ * `maxOutputTokens` also has to cover thinking. A ceiling is not a spend:
+ * nothing is billed for room the model does not use, while a ceiling that is
+ * too low truncates the JSON and costs the whole call.
  */
 export function outputBudget(count: number): number {
-  return Math.min(8192, 256 + 180 * count);
+  return Math.min(8192, 512 + 220 * count);
 }
 
 export async function generateQuestions(
@@ -59,17 +62,18 @@ export async function generateQuestions(
   });
 
   /**
-   * Validation runs inside the request, so a set that fails it reaches the
-   * repair path with the reason attached rather than as a generic "bad JSON".
+   * Validation runs inside the request, but only structural failure throws.
+   *
+   * A set where most questions were dropped is still a set: five good
+   * questions are a perfectly good round, and throwing them away to ask for a
+   * replacement — which might come back worse — used to turn a usable answer
+   * into "could not be read". Whether to spend the repair call is decided
+   * below, with the survivors still in hand.
    */
-  const validate = (raw: unknown): ValidatedSet => {
-    const set = validateQuestionSet(raw, input.sentences, input.lang);
-    if (needsRepair(set)) {
-      const why = set.dropped[0]?.reason ?? "no usable questions";
-      throw new Error(`most questions were unusable: ${why}`);
-    }
-    return set;
-  };
+  const validate = (raw: unknown): ValidatedSet =>
+    validateQuestionSet(raw, input.sentences, input.lang);
+
+  let failure: AiError | null = null;
 
   const request: StructuredRequest<ValidatedSet> = {
     modelId: input.modelId,
@@ -87,9 +91,11 @@ export async function generateQuestions(
     label: "questions",
   };
 
+  let first: GenerateOutcome | null = null;
+
   try {
     const result = await provider.complete(request, signal);
-    return {
+    first = {
       questions: result.value.questions,
       modelId: result.modelId,
       dropped: result.value.dropped,
@@ -97,6 +103,9 @@ export async function generateQuestions(
       promptTokens: result.usage.promptTokens,
       outputTokens: result.usage.outputTokens,
     };
+
+    // Good enough to play: hand it over without spending another request.
+    if (!needsRepair(result.value)) return first;
   } catch (error) {
     if (!(error instanceof AiError) || error.code !== "bad_json") throw error;
 
@@ -108,26 +117,53 @@ export async function generateQuestions(
      * follow the schema when told precisely what was wrong, a third try will
      * not help, and the offline generator is waiting.
      */
-    const repair = buildRepairPrompt(error.detail, error.detail);
-    const repaired = await provider.complete(
-      {
-        ...request,
-        system: repair.system,
-        text: repair.user,
-        temperature: 0,
-        thinking: "off",
-        label: "repair",
-      },
-      signal,
-    );
+    failure = error;
+  }
 
-    return {
-      questions: repaired.value.questions,
-      modelId: repaired.modelId,
-      dropped: repaired.value.dropped,
-      repaired: true,
-      promptTokens: repaired.usage.promptTokens,
-      outputTokens: repaired.usage.outputTokens,
-    };
+  {
+    const detail = failure?.detail ?? first?.dropped[0]?.reason ?? "most questions were unusable";
+    const repair = buildRepairPrompt(detail, detail);
+    try {
+      const repaired = await provider.complete(
+        {
+          ...request,
+          system: repair.system,
+          text: repair.user,
+          temperature: 0,
+          thinking: "off",
+          label: "repair",
+        },
+        signal,
+      );
+
+      // A repair that produced nothing is not an improvement on nothing: the
+      // caller has an offline generator waiting and needs to be told to use it.
+      const better =
+        repaired.value.questions.length > 0 &&
+        (first === null || repaired.value.questions.length >= first.questions.length);
+      if (better) {
+        return {
+          questions: repaired.value.questions,
+          modelId: repaired.modelId,
+          dropped: repaired.value.dropped,
+          repaired: true,
+          promptTokens: repaired.usage.promptTokens,
+          outputTokens: repaired.usage.outputTokens,
+        };
+      }
+    } catch (error) {
+      /**
+       * The repair failed too, and that is survivable.
+       *
+       * What is not survivable is throwing away questions that were already
+       * good. A round of four is a round; "could not be read" is nothing.
+       */
+      if (first === null || first.questions.length === 0) throw error;
+    }
+
+    if (first === null || first.questions.length === 0) {
+      throw failure ?? new AiError("bad_json", "no usable questions");
+    }
+    return { ...first, repaired: true };
   }
 }

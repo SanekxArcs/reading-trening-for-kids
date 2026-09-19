@@ -17,6 +17,7 @@ import { checkBudget, record } from "./runtime/ledger.ts";
 import { readApiKey, readModelId } from "./runtime/key.ts";
 import { getQueue } from "./runtime/queue.ts";
 import { noteObservedLimit } from "./runtime/quota.ts";
+import { noteFailure } from "./runtime/diagnostics.ts";
 
 /**
  * The single door between the app and a model.
@@ -85,6 +86,10 @@ async function run<T>(
      */
     const modelId = readModelId();
     if (aiError.quota && modelId) noteObservedLimit(modelId, aiError.quota);
+
+    // Kept so the next "it stopped working" has something behind it. The copy
+    // a parent is shown is short by design, which makes it useless to debug by.
+    noteFailure({ code: aiError.code, detail: aiError.detail, label });
     // A request that never left — blocked by a gate — is not spend, so it is
     // not recorded. Anything that reached the wire is.
     if (aiError.code !== "local_cap" && aiError.code !== "daily_quota") {

@@ -12,13 +12,19 @@ export interface GeminiContent {
   parts: GeminiPart[];
 }
 
+/**
+ * Two dialects of the same idea, and sending the wrong one is expensive.
+ *
+ * Gemini 2.5 takes `thinkingBudget`, a token count, where zero disables
+ * thinking. Gemini 3 takes `thinkingLevel` and **cannot be told to stop
+ * thinking at all** — the lowest setting is "low". A 3.x model sent a budget
+ * either rejects the request or ignores the field and thinks at its default
+ * level, which is the more expensive half of the mistake: thought tokens count
+ * against `maxOutputTokens`, so the answer gets truncated instead.
+ */
 export interface GeminiThinkingConfig {
-  /**
-   * Zero disables thinking on the models that allow it. Some reject zero and
-   * want a minimum; older ones reject the field entirely. Probed, never
-   * assumed — see `capabilities.ts`.
-   */
   thinkingBudget?: number;
+  thinkingLevel?: "low" | "medium" | "high";
 }
 
 export interface GeminiGenerationConfig {

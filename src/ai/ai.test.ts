@@ -13,6 +13,9 @@ import {
   isDailyQuota,
   parseRetryDelayMs,
   thinkingBudget,
+  thinkingFor,
+  withThinkingRoom,
+  THINKING_RESERVE,
   toUsage,
   toWire,
 } from "./gemini/map.ts";
@@ -181,6 +184,66 @@ describe("toWire", () => {
     expect(thinkingBudget("off", true)).toBe(0);
     expect(thinkingBudget("low", true)).toBeGreaterThan(0);
     expect(thinkingBudget("auto", true)).toBeUndefined();
+  });
+
+  /**
+   * The bug that produced a run of "could not be read" errors.
+   *
+   * Generation 3 took the token budget away and replaced it with a level.
+   * A 3.x model sent the old field ignores it, thinks at its own default, and
+   * spends the output budget on thoughts — so the JSON comes back truncated
+   * every single time.
+   */
+  describe("thinkingFor", () => {
+    it("sends a level to a model that only understands levels", () => {
+      expect(thinkingFor("gemini-3.8-flash", "low", true)).toEqual({ thinkingLevel: "low" });
+      expect(thinkingFor("gemini-3.5-flash-lite", "low", true)).toEqual({ thinkingLevel: "low" });
+    });
+
+    /** Generation 3 has no "off": the least it will do is "low". */
+    it("asks for the least a generation 3 model will do rather than for none", () => {
+      expect(thinkingFor("gemini-3.8-flash", "off", true)).toEqual({ thinkingLevel: "low" });
+    });
+
+    it("still sends a budget to the generation that understands budgets", () => {
+      expect(thinkingFor("gemini-2.5-flash", "off", true)).toEqual({ thinkingBudget: 0 });
+      expect(thinkingFor("gemini-2.5-flash", "low", true)).toMatchObject({
+        thinkingBudget: expect.any(Number),
+      });
+    });
+
+    it("says nothing at all for a model that rejected the field", () => {
+      expect(thinkingFor("gemini-3.8-flash", "low", false)).toBeUndefined();
+      expect(thinkingFor("gemini-2.5-flash", "auto", true)).toBeUndefined();
+    });
+  });
+
+  describe("withThinkingRoom", () => {
+    /**
+     * `maxOutputTokens` covers thought tokens too, so a ceiling sized for the
+     * JSON alone truncates every thinking model. The ceiling is not a spend.
+     */
+    it("leaves room for the thinking on top of the answer", () => {
+      expect(withThinkingRoom(1000, { thinkingLevel: "low" })).toBe(1000 + THINKING_RESERVE);
+    });
+
+    it("leaves room even when nothing was configured, because it still thinks", () => {
+      expect(withThinkingRoom(1000, undefined)).toBeGreaterThan(1000);
+    });
+
+    it("leaves none for the one model that was told not to think", () => {
+      expect(withThinkingRoom(1000, { thinkingBudget: 0 })).toBe(1000);
+    });
+
+    it("never asks for more than any model would allow", () => {
+      expect(withThinkingRoom(100_000, { thinkingLevel: "low" })).toBeLessThanOrEqual(32_768);
+    });
+  });
+
+  it("gives a generation 3 model both a level and room to use it", () => {
+    const wire = toWire({ ...request, modelId: "gemini-3.8-flash" }, { thinkingSupported: true });
+    expect(wire.generationConfig?.thinkingConfig).toEqual({ thinkingLevel: "low" });
+    expect(wire.generationConfig?.maxOutputTokens).toBeGreaterThan(request.maxOutputTokens);
   });
 
   it("puts the instruction before any media", () => {
@@ -611,10 +674,33 @@ describe("generateQuestions", () => {
     expect(outcome.questions).toHaveLength(3);
   });
 
-  it("gives up rather than looping when the repair also fails", async () => {
+  /**
+   * A round of one is still a round; "could not be read" is nothing.
+   *
+   * Throwing away the questions that *did* survive, because others did not,
+   * was turning a usable answer into a failure — and then into a second
+   * failure when the repair came back no better.
+   */
+  it("plays what survived rather than failing when the repair is no better", async () => {
     const scripted = scriptFetch([
       { status: 200, body: asCandidate(JSON.stringify(BAD_CITATIONS_SET)) },
       { status: 200, body: asCandidate(JSON.stringify(BAD_CITATIONS_SET)) },
+    ]);
+    const gemini = new GeminiProvider({ apiKey: "k", fetchImpl: scripted.fetch });
+
+    const outcome = await generateQuestions(gemini, input);
+
+    // Still exactly one repair: the survivors are used, not asked for again.
+    expect(scripted.requests).toHaveLength(2);
+    expect(outcome.questions.length).toBeGreaterThan(0);
+    expect(outcome.repaired).toBe(true);
+  });
+
+  it("gives up when nothing usable came back either time", async () => {
+    const empty = JSON.stringify({ language: "uk", questions: [] });
+    const scripted = scriptFetch([
+      { status: 200, body: asCandidate(empty) },
+      { status: 200, body: asCandidate(empty) },
     ]);
     const gemini = new GeminiProvider({ apiKey: "k", fetchImpl: scripted.fetch });
 

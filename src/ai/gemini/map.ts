@@ -1,7 +1,9 @@
 import { AiError, type AiErrorCode } from "../core/errors.ts";
+import { modelGeneration } from "../core/modelLimits.ts";
 import type { MediaPart, StructuredRequest, ThinkingPreference, Usage } from "../core/provider.ts";
 import type {
   GeminiErrorBody,
+  GeminiThinkingConfig,
   GeminiGenerateContentRequest,
   GeminiGenerateContentResponse,
   GeminiSafetySetting,
@@ -32,14 +34,76 @@ export const KID_SAFETY: GeminiSafetySetting[] = [
   { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" },
 ];
 
-/** Thinking budget in tokens, or undefined to omit the field entirely. */
+/** What "low" costs on a model that counts thinking in tokens. */
+export const LOW_BUDGET_TOKENS = 512;
+
+/**
+ * Enough headroom for a model that will not stop thinking.
+ *
+ * Gemini 3 Flash thinks at medium by default and cannot be told not to, so the
+ * reserve has to cover a level the app never asked for.
+ */
+export const THINKING_RESERVE = 4096;
+
+/** The token budget a 2.5-era model understands, or undefined to omit it. */
 export function thinkingBudget(
   preference: ThinkingPreference,
   supported: boolean,
 ): number | undefined {
   if (!supported) return undefined;
   if (preference === "auto") return undefined;
-  return preference === "off" ? 0 : 512;
+  return preference === "off" ? 0 : LOW_BUDGET_TOKENS;
+}
+
+/**
+ * The thinking field this model actually understands.
+ *
+ * Generation 3 replaced the token budget with a level and removed the ability
+ * to switch thinking off, so "off" there means "as little as it will do",
+ * which is `low`. Sending the 2.5 field to a 3.x model is what caused a run of
+ * unreadable answers: the field was ignored, the model thought at its default
+ * level, and the thoughts ate the output budget the JSON needed.
+ */
+export function thinkingFor(
+  modelId: string,
+  preference: ThinkingPreference,
+  supported: boolean,
+): GeminiThinkingConfig | undefined {
+  if (!supported || preference === "auto") return undefined;
+
+  // Generation 3 has no "off", so both of this app's settings land on "low" —
+  // the least it will do. Nothing here ever asks for more: the one call that
+  // benefits from thinking benefits from a little of it.
+  if (modelGeneration(modelId) >= 300) return { thinkingLevel: "low" };
+
+  const budget = thinkingBudget(preference, supported);
+  return budget === undefined ? undefined : { thinkingBudget: budget };
+}
+
+/**
+ * Room for the answer *after* the model has finished thinking.
+ *
+ * `maxOutputTokens` covers thought tokens as well as the reply, so a ceiling
+ * sized for the JSON alone truncates every thinking model — and a truncated
+ * JSON object is exactly the "could not be read" error a parent sees. The
+ * ceiling is not a spend: nothing is billed for room that goes unused.
+ */
+export function withThinkingRoom(
+  maxOutputTokens: number,
+  thinking: GeminiThinkingConfig | undefined,
+): number {
+  // A budget of zero is the one case where no room is needed: that model was
+  // told not to think and will obey.
+  if (thinking?.thinkingBudget === 0) return maxOutputTokens;
+
+  /**
+   * The reserve applies even when no thinking was configured at all.
+   *
+   * A model whose catalogue entry says nothing about thinking, or one that
+   * rejected the field and had it dropped by the probe, still thinks — and
+   * still spends the output budget doing it.
+   */
+  return Math.min(32_768, maxOutputTokens + THINKING_RESERVE);
 }
 
 export interface ToWireOptions {
@@ -51,7 +115,7 @@ export function toWire<T>(
   request: StructuredRequest<T>,
   options: ToWireOptions,
 ): GeminiGenerateContentRequest {
-  const budget = thinkingBudget(request.thinking, options.thinkingSupported);
+  const thinking = thinkingFor(request.modelId, request.thinking, options.thinkingSupported);
 
   // Instruction first, then media: page ordering survives, and the model knows
   // what it is looking at before it looks.
@@ -69,9 +133,9 @@ export function toWire<T>(
       responseMimeType: "application/json",
       responseSchema: request.schema,
       temperature: request.temperature,
-      maxOutputTokens: request.maxOutputTokens,
+      maxOutputTokens: withThinkingRoom(request.maxOutputTokens, thinking),
       candidateCount: 1,
-      ...(budget === undefined ? {} : { thinkingConfig: { thinkingBudget: budget } }),
+      ...(thinking === undefined ? {} : { thinkingConfig: thinking }),
     },
     safetySettings: KID_SAFETY,
   };
